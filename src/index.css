@@ -1,0 +1,191 @@
+@import "tailwindcss";
+
+/* =========================================
+   TELEGRAM INSPIRED THEME
+========================================= */
+
+@theme {
+  /* Primary Telegram Blue */
+  --color-primary-50: #eaf4ff;
+  --color-primary-100: #d5e9ff;
+  --color-primary-200: #acd5ff;
+  --color-primary-300: #7bbfff;
+  --color-primary-400: #3390ec;
+  --color-primary-500: #2481cc;
+  --color-primary-600: #1d70b8;
+  --color-primary-700: #185b96;
+  --color-primary-800: #164b7a;
+  --color-primary-900: #153f65;
+
+  /* Backgrounds */
+  --color-background: #f4f4f5;
+  --color-surface: #ffffff;
+  --color-surface-secondary: #f8f9fa;
+  --color-surface-hover: #f1f5f9;
+
+  /* Sidebar */
+  --color-sidebar: #ffffff;
+  --color-sidebar-active: #eaf4ff;
+  --color-sidebar-hover: #f3f6f9;
+
+  /* Chat */
+  --color-chat-background: #e7ebef;
+  --color-chat-outgoing: #e1ffc7;
+  --color-chat-incoming: #ffffff;
+  --color-chat-input: #ffffff;
+
+  /* Text */
+  --color-foreground: #212121;
+  --color-muted: #707579;
+  --color-subtle: #a0a6ab;
+  --color-primary-text: #2481cc;
+
+  /* Borders */
+  --color-border: #e5e7eb;
+  --color-border-strong: #d5dbe0;
+
+  /* Status */
+  --color-online: #4caf50;
+  --color-offline: #9ca3af;
+  --color-delivered: #4fa3df;
+  --color-read: #3390ec;
+  --color-error: #e53935;
+  --color-warning: #f59e0b;
+  --color-success: #22c55e;
+
+  /* Message bubbles */
+  --color-message-sent: #e1ffc7;
+  --color-message-received: #ffffff;
+
+  /* Typography */
+  --font-sans: Arial, Helvetica, sans-serif;
+
+  /* Shadows */
+  --shadow-soft: 0 1px 3px rgb(0 0 0 / 0.06);
+  --shadow-card: 0 2px 8px rgb(0 0 0 / 0.08);
+  --shadow-dropdown: 0 4px 16px rgb(0 0 0 / 0.12);
+
+  /* Border radius */
+  --radius-chat: 12px;
+}
+
+/* =========================================
+   CSS VARIABLES
+========================================= */
+
+:root {
+  color-scheme: light;
+
+  --app-background: #f4f4f5;
+  --app-foreground: #212121;
+
+  --chat-wallpaper:
+    radial-gradient(circle, #d5dce2 1px, transparent 1px);
+
+  --chat-wallpaper-size: 20px 20px;
+}
+
+/* =========================================
+   BASE STYLES
+========================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background-image: url('/assets/img/background.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+
+  color: var(--app-foreground);
+  font-family: Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* =========================================
+   CHAT WALLPAPER
+========================================= */
+
+.chat-wallpaper {
+  background-color: var(--color-chat-background);
+  background-image: var(--chat-wallpaper);
+  background-size: var(--chat-wallpaper-size);
+}
+
+/* =========================================
+   SCROLLBAR
+========================================= */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #c5cbd1 transparent;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c5cbd1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #aeb6bd;
+}
+
+/* =========================================
+   MESSAGE BUBBLES
+========================================= */
+
+.message-sent {
+  background-color: var(--color-message-sent);
+  border-radius: 12px 12px 2px 12px;
+}
+
+.message-received {
+  background-color: var(--color-message-received);
+  border-radius: 12px 12px 12px 2px;
+}
+
+/* =========================================
+   SELECTION
+========================================= */
+
+::selection {
+  background-color: #acd5ff;
+  color: #153f65;
+}
+
+/* =========================================
+   FOCUS
+========================================= */
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+}
