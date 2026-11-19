@@ -3,7 +3,16 @@ import { Outlet } from 'react-router-dom';
 
 export const AppLayout = () => {
   return (
-    <main className="flex h-dvh overflow-hidden p-3">
+    <main
+      style={{
+        backgroundImage: "url('/assets/img/background.png')",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'fixed',
+      }}
+      className="flex h-dvh overflow-hidden p-3"
+    >
       <div className="flex h-full w-full overflow-hidden shadow-soft justify-between">
         <AppSidebar />
 

@@ -1,13 +1,13 @@
-import { PageLoader } from "@/components/common/loaders/page-loader";
-import { authApi } from "@/features/auth/api/auth.api";
-import { useAuthStore } from "@/lib/store/auth.store";
-import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+// import { PageLoader } from "@/components/common/loaders/page-loader";
+import { authApi } from '@/api/auth/auth.api';
+import { useAuthStore } from '@/lib/store/auth.store';
+import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { setUser, clearUser, setLoading } = useAuthStore();
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["me"],
+    queryKey: ['me'],
     queryFn: authApi.me,
     retry: false,
   });
@@ -26,11 +26,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [data, isError, setUser, clearUser, isLoading]);
 
   if (isLoading) {
-    return (
-      <>
-        <PageLoader />
-      </>
-    );
+    return <>{/* <PageLoader /> */}</>;
   }
 
   return children;
