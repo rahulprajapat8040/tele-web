@@ -16,7 +16,6 @@ export interface ISearchParam {
   page: number;
   limit: number;
   search?: string;
-  role?: string;
 }
 
 export interface ICursorRes {

@@ -7,6 +7,7 @@ export const ProtectedRoute = () => {
   const { user, isLoading } = useAuthStore(); // Replace with real auth state
   if (isLoading) {
     // return <PageLoader />;
+    return;
   }
   if (!user) {
     return <Navigate to={APP_ROUTES.LOGIN} replace />;

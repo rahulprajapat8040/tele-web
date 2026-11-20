@@ -185,3 +185,53 @@ input:focus,
 textarea:focus {
   outline: none;
 }
+
+/* =========================================
+   TELEGRAM COUNTRY DROPDOWN
+========================================= */
+
+.telegram-country-popover {
+  transform-origin: top center;
+  animation: telegram-popover-in 220ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes telegram-popover-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Country List Scrollbar */
+
+.telegram-country-list {
+  scrollbar-width: thin;
+  scrollbar-color: #555 transparent;
+}
+
+.telegram-country-list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.telegram-country-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.telegram-country-list::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 10px;
+}
+
+/* Reduced Motion */
+
+@media (prefers-reduced-motion: reduce) {
+  .telegram-country-popover {
+    animation: none;
+  }
+}

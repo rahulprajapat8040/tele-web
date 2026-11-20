@@ -6,4 +6,5 @@ export const APP_ROUTES = {
 
 export const API_ENDPOINTS = {
   AUTH: 'auth',
+  CONVERSATIONS: 'conversations',
 };

@@ -1,4 +1,4 @@
-import type { IApiResponse } from "@/api/axios/base-res.interface";
+import type { IApiResponse } from "@/lib/interfaces/common/base-res.interface";
 import { request } from "@/api/axios/request";
 
 export interface IUploadResponse {
