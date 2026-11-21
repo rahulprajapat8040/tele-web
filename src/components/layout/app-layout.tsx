@@ -1,4 +1,3 @@
-import { ChatDeliveryListener } from '@/features/chat/components/common/chat-delivery-listener';
 import { AppSidebar } from './app-sidebar';
 import { Outlet } from 'react-router-dom';
 import ChatSocketListener from '@/features/chat/components/common/chat-socket-listener';
@@ -15,7 +14,7 @@ export const AppLayout = () => {
       }}
       className="flex h-dvh overflow-hidden p-3"
     >
-      <ChatDeliveryListener />
+      {/* <ChatDeliveryListener /> */}
       <ChatSocketListener />
       <div className="flex h-full w-full overflow-hidden shadow-soft justify-between">
         <AppSidebar />

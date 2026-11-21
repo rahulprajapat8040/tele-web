@@ -22,23 +22,17 @@ export const MessageItem = ({ message, isOwn }: MessageItemProps) => {
       className={`flex w-full ${isOwn ? 'justify-end' : 'justify-start'}`}
     >
       <div
-        className={`relative max-w-[78%] flex gap-3 min-w-22.5 px-3.5 py-1.5 shadow-sm sm:max-w-[65%] ${
+        className={`relative min-w-0 max-w-[78%] px-3.5 py-1.5 shadow-sm sm:max-w-[65%] ${
           isOwn
             ? 'rounded-2xl rounded-br-sm bg-[#d9fdd3] text-[#172b20] dark:bg-[#285c4a] dark:text-white'
-            : 'rounded-2xl rounded-bl-sm bg-white text-gray-800 dark:bg-[#202c33] dark:text-gray-100'
+            : 'rounded-2xl rounded-tl-sm bg-white text-gray-800 dark:bg-[#202c33] dark:text-gray-100'
         }`}
       >
-        {!isOwn && (
-          <p className="mb-1 text-xs font-semibold text-primary-700 dark:text-primary-400">
-            {message.sender?.firstName ?? 'Unknown'}
-          </p>
-        )}
-
-        <p className="whitespace-pre-wrap wrap-break-word text-[14px] leading-[1.55]">
+        <p className="whitespace-pre-wrap wrap-break-word text-wrap text-[14px] leading-[1.55]">
           {message.content}
         </p>
 
-        <div className="mt-2 flex items-center justify-end gap-0.5">
+        <div className="mt-2 shrink-0 flex items-center justify-end gap-0.5">
           <span className="text-[10px] text-gray-500 dark:text-gray-300">
             {formatMessageTime(message.createdAt)}
           </span>

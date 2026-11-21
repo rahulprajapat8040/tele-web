@@ -7,14 +7,14 @@ import {
 } from 'react';
 
 import { useMessages } from '@/hooks/use-messages';
-import { getSocket } from '@/services/socket.service';
 
 import { LoaderCircle, MessageCircle } from 'lucide-react';
 import { useChatStore } from '@/lib/store/chat.store';
 import type { IMessage } from '@/lib/interfaces/conversations/messages-res.interface';
-import { CHAT_EVENTS } from '@/lib/constant/chat-events.constant';
 import { formatMessageDate } from '@/lib/utils';
 import { MessageItem } from './messages-item';
+import { CHAT_EVENTS } from '@/lib/constant/chat-events.constant';
+import { getSocket } from '@/services/socket.service';
 
 interface MessagesListProps {
   conversationId: string;
@@ -36,7 +36,7 @@ export const MessagesList = ({
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useMessages(conversationId);
 
-  const { setMessages, addMessage, updateMessageStatus } = useChatStore();
+  const { setMessages } = useChatStore();
 
   const messages = useChatStore(
     (state) => state.messages[conversationId] ?? EMPTY_MESSAGES,
@@ -61,64 +61,60 @@ export const MessagesList = ({
     }
   }, [data, conversationId, apiMessages, setMessages]);
 
-  // Listen for real-time messages.
+  const lastReadMessageRef = useRef<string | null>(null);
+
   useEffect(() => {
+    lastReadMessageRef.current = null;
+  }, [conversationId]);
+
+  useEffect(() => {
+    if (!conversationId || !messages.length) return;
+
     const socket = getSocket();
 
-    if (!socket) return;
+    const emitReadReceipt = () => {
+      if (!socket.connected || document.visibilityState !== 'visible') return;
 
-    const handleNewMessage = (payload: any) => {
-      // Adapt this extraction to the exact shape emitted by your gateway.
-      const message: IMessage =
-        payload?.message?.data ??
-        payload?.data?.data ??
-        payload?.data ??
-        payload?.message ??
-        payload;
+      const lastIncomingMessage = [...messages]
+        .reverse()
+        .find((message) => message.senderId !== currentUserId);
 
-      console.log('Newwww message', message);
+      if (!lastIncomingMessage) return;
 
-      if (!message?.id || message.conversationId !== conversationId) {
-        return;
+      // Prevent duplicate emissions for the same cursor
+      if (lastReadMessageRef.current === lastIncomingMessage.id) return;
+
+      lastReadMessageRef.current = lastIncomingMessage.id;
+
+      socket.emit(CHAT_EVENTS.MESSAGE_READ, {
+        conversationId,
+        lastReadMessageId: lastIncomingMessage.id,
+      });
+    };
+
+    const handleConnect = () => {
+      // Retry when the socket reconnects
+      lastReadMessageRef.current = null;
+      emitReadReceipt();
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        emitReadReceipt();
       }
-
-      addMessage(conversationId, message);
     };
 
-    socket.on(CHAT_EVENTS.NEW_MESSAGE, handleNewMessage);
+    socket.on('connect', handleConnect);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Run immediately if already connected
+    emitReadReceipt();
 
     return () => {
-      socket.off(CHAT_EVENTS.NEW_MESSAGE, handleNewMessage);
+      socket.off('connect', handleConnect);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [conversationId, addMessage]);
-
-  useEffect(() => {
-    const socket = getSocket();
-
-    if (!socket) return;
-
-    const handleMessageStatus = (payload: any) => {
-      console.log('MESSAGE STATUS RECEIVED:', payload);
-
-      if (payload.conversationId !== conversationId) return;
-
-      if (!payload.messageIds?.length) return;
-
-      updateMessageStatus(
-        payload.conversationId,
-        payload.messageIds,
-        payload.status,
-        payload.deliveredBy ?? payload.readBy,
-        payload.deliveredAt ?? payload.readAt ?? new Date().toISOString(),
-      );
-    };
-
-    socket.on(CHAT_EVENTS.MESSAGE_STATUS, handleMessageStatus);
-
-    return () => {
-      socket.off(CHAT_EVENTS.MESSAGE_STATUS, handleMessageStatus);
-    };
-  }, [conversationId, updateMessageStatus]);
+  }, [conversationId, messages, currentUserId]);
 
   // Track whether the user is near the bottom.
   const handleScroll = useCallback(() => {

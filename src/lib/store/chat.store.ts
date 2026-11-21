@@ -30,6 +30,14 @@ interface ChatState {
     userId: string,
     timestamp: string,
   ) => void;
+
+  typingUsers: Record<string, string[]>;
+
+  setTyping: (
+    conversationId: string,
+    userId: string,
+    isTyping: boolean,
+  ) => void;
 }
 
 export const useChatStore = create<ChatState>((set) => ({
@@ -156,45 +164,63 @@ export const useChatStore = create<ChatState>((set) => ({
           [conversationId]: currentMessages.map((message) => {
             if (!messageIdSet.has(message.id)) return message;
 
-            const existingReceipts = message.receipts ?? [];
-
-            const receiptExists = existingReceipts.some(
+            const receipts = message.receipts ?? [];
+            const existingReceipt = receipts.find(
               (receipt) => receipt.userId === userId,
             );
 
-            // Update existing receipt
-            const updatedReceipts = existingReceipts.map((receipt) => {
-              if (receipt.userId !== userId) return receipt;
-
-              return {
-                ...receipt,
-                deliveredAt:
-                  receipt.deliveredAt ??
-                  (status === 'DELIVERED' || status === 'READ'
-                    ? timestamp
-                    : null),
-                readAt:
-                  receipt.readAt ?? (status === 'READ' ? timestamp : null),
-              };
-            });
-
-            // Create receipt if it doesn't exist
-            if (!receiptExists) {
-              updatedReceipts.push({
-                userId,
-                deliveredAt:
-                  status === 'DELIVERED' || status === 'READ'
-                    ? timestamp
-                    : null,
-                readAt: status === 'READ' ? timestamp : null,
-              } as IMessage['receipts'][number]);
+            // Don't downgrade a READ receipt
+            if (existingReceipt?.readAt && status === 'DELIVERED') {
+              return message;
             }
+
+            const updatedReceipts = existingReceipt
+              ? receipts.map((receipt) =>
+                  receipt.userId !== userId
+                    ? receipt
+                    : {
+                        ...receipt,
+                        deliveredAt: receipt.deliveredAt ?? timestamp,
+                        readAt:
+                          status === 'READ'
+                            ? receipt.readAt ?? timestamp
+                            : receipt.readAt,
+                      },
+                )
+              : [
+                  ...receipts,
+                  {
+                    userId,
+                    deliveredAt: timestamp,
+                    readAt: status === 'READ' ? timestamp : null,
+                  } as IMessage['receipts'][number],
+                ];
 
             return {
               ...message,
               receipts: updatedReceipts,
             };
           }),
+        },
+      };
+    }),
+
+  typingUsers: {},
+
+  setTyping: (conversationId, userId, isTyping) =>
+    set((state) => {
+      const currentUsers = state.typingUsers[conversationId] ?? [];
+
+      const updatedUsers = isTyping
+        ? currentUsers.includes(userId)
+          ? currentUsers
+          : [...currentUsers, userId]
+        : currentUsers.filter((id) => id !== userId);
+
+      return {
+        typingUsers: {
+          ...state.typingUsers,
+          [conversationId]: updatedUsers,
         },
       };
     }),

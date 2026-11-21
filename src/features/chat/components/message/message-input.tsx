@@ -3,15 +3,23 @@ import { useState, type SubmitEvent } from 'react';
 import { MessageAttachment } from './message-attachment';
 import { VoiceMessage } from './voice-message';
 import { AnimatePresence, motion } from 'motion/react';
+import { useTypingIndicator } from '@/hooks/use-typing-indicator';
 
 interface MessageInputProps {
+  conversationId: string;
   onSend: (message: string) => Promise<void>;
   disabled?: boolean;
 }
 
-export const MessageInput = ({ onSend, disabled }: MessageInputProps) => {
+export const MessageInput = ({
+  conversationId,
+  onSend,
+  disabled,
+}: MessageInputProps) => {
   const [messageText, setMessageText] = useState('');
   const [sending, setSending] = useState(false);
+
+  const { handleTyping, stopTyping } = useTypingIndicator(conversationId);
 
   const handleSubmit = async (e: SubmitEvent) => {
     e.preventDefault();
@@ -19,6 +27,8 @@ export const MessageInput = ({ onSend, disabled }: MessageInputProps) => {
     const content = messageText.trim();
 
     if (!content || sending || disabled) return;
+
+    stopTyping();
 
     try {
       setSending(true);
@@ -29,23 +39,34 @@ export const MessageInput = ({ onSend, disabled }: MessageInputProps) => {
     }
   };
 
+  const handleChange = (value: string) => {
+    setMessageText(value);
+
+    if (value.trim().length > 0) {
+      handleTyping();
+    } else {
+      stopTyping();
+    }
+  };
+
   return (
     <form
       onSubmit={handleSubmit}
-      className="w-full h-12 gap-2 rounded-full bg-foreground/95 px-2 text-background flex items-center justify-between"
+      className="flex h-12 w-full items-center justify-between gap-2 rounded-full bg-foreground/95 px-2 text-background"
     >
       <MessageAttachment />
 
       <input
         type="text"
         value={messageText}
-        onChange={(e) => setMessageText(e.target.value)}
+        onChange={(e) => handleChange(e.target.value)}
+        onBlur={stopTyping}
         placeholder="Message"
         disabled={disabled || sending}
-        className="font-medium flex-1 outline-none bg-transparent"
+        className="flex-1 bg-transparent font-medium outline-none"
       />
 
-      <div className="bg-primary-700 size-10 rounded-full grid place-items-center overflow-hidden shrink-0">
+      <div className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-full bg-primary-700">
         <AnimatePresence mode="wait" initial={false}>
           {messageText.trim() ? (
             <motion.button
@@ -56,6 +77,7 @@ export const MessageInput = ({ onSend, disabled }: MessageInputProps) => {
               transition={{ duration: 0.18, ease: 'easeOut' }}
               type="submit"
               disabled={sending || disabled}
+              className="grid size-10 place-items-center"
             >
               <Send size={22} />
             </motion.button>
@@ -66,7 +88,7 @@ export const MessageInput = ({ onSend, disabled }: MessageInputProps) => {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.5, y: -10 }}
               transition={{ duration: 0.18, ease: 'easeOut' }}
-              className="size-full grid place-items-center"
+              className="grid size-full place-items-center"
             >
               <VoiceMessage />
             </motion.div>

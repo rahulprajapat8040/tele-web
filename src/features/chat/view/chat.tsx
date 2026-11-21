@@ -7,14 +7,26 @@ import { useChatStore } from '@/lib/store/chat.store';
 import { useEffect } from 'react';
 import type { IMessage } from '@/lib/interfaces/conversations/messages-res.interface';
 import { useAuthStore } from '@/lib/store/auth.store';
+import { getSocket } from '@/services/socket.service';
+import { CHAT_EVENTS } from '@/lib/constant/chat-events.constant';
 
 export const Chat = () => {
   const { id: conversationId } = useParams();
   const { user } = useAuthStore();
   const [currentUserId, currentUserFirstName] = [user.id, user.firstName];
 
-  const { addMessage, replaceMessage, updateMessage, setActiveConversation } =
-    useChatStore();
+  const {
+    addMessage,
+    replaceMessage,
+    updateMessage,
+    setActiveConversation,
+    typingUsers,
+  } = useChatStore();
+
+  const isTyping = (typingUsers[conversationId ?? ''] ?? []).some(
+    (id) => id !== currentUserId,
+  );
+  console.log('typingggg userrr', typingUsers);
 
   useEffect(() => {
     setActiveConversation(conversationId ?? null);
@@ -73,9 +85,35 @@ export const Chat = () => {
 
   if (!conversationId) return null;
 
+  useEffect(() => {
+    if (!conversationId) return;
+
+    const socket = getSocket();
+
+    const joinConversation = () => {
+      console.log('Joining conversation room:', conversationId);
+
+      socket.emit(CHAT_EVENTS.CONVERSATION_JOIN, {
+        conversationId,
+      });
+    };
+
+    // Join if already connected
+    if (socket.connected) {
+      joinConversation();
+    }
+
+    // Join again on reconnection
+    socket.on('connect', joinConversation);
+
+    return () => {
+      socket.off('connect', joinConversation);
+    };
+  }, [conversationId]);
+
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <ChatHeader />
+      <ChatHeader typing={isTyping} />
 
       <div className="min-h-0 flex-1">
         <MessagesList
@@ -85,7 +123,10 @@ export const Chat = () => {
       </div>
 
       <div className="shrink-0 p-3">
-        <MessageInput onSend={handleSendMessage} />
+        <MessageInput
+          conversationId={conversationId}
+          onSend={handleSendMessage}
+        />
       </div>
     </div>
   );

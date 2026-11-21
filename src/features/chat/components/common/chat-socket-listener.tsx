@@ -4,7 +4,7 @@ import { getSocket } from '@/services/socket.service';
 import { useEffect } from 'react';
 
 export default function ChatSocketListener() {
-  const { addMessage, updateMessageStatus } = useChatStore();
+  const { addMessage, updateMessageStatus, setTyping } = useChatStore();
 
   useEffect(() => {
     const socket = getSocket();
@@ -36,17 +36,57 @@ export default function ChatSocketListener() {
     // MESSAGE STATUS
     // ---------------------------
     const handleMessageStatus = (payload: any) => {
-      if (!payload?.conversationId || !payload?.messageIds?.length) {
+      const {
+        conversationId,
+        messageIds,
+        status,
+        deliveredBy,
+        readBy,
+        deliveredAt,
+        readAt,
+      } = payload;
+
+      if (!conversationId || !messageIds?.length) return;
+
+      if (status !== 'DELIVERED' && status !== 'READ') return;
+
+      const userId = status === 'READ' ? readBy : deliveredBy;
+      const timestamp = status === 'READ' ? readAt : deliveredAt;
+
+      if (!userId || !timestamp) {
+        console.warn('Invalid MESSAGE_STATUS payload:', payload);
         return;
       }
 
       updateMessageStatus(
-        payload.conversationId,
-        payload.messageIds,
-        payload.status,
-        payload.deliveredBy ?? payload.readBy,
-        payload.deliveredAt ?? payload.readAt,
+        conversationId,
+        messageIds,
+        status,
+        userId,
+        timestamp,
       );
+
+      console.log('MESSAGE STATUS UPDATED:', {
+        conversationId,
+        messageIds,
+        status,
+        userId,
+        timestamp,
+      });
+    };
+
+    const handleUserTyping = (payload: {
+      conversationId: string;
+      userId: string;
+      isTyping: boolean;
+    }) => {
+      const { conversationId, userId, isTyping } = payload;
+
+      console.log('hanldeee userrr typing', payload);
+
+      if (!conversationId || !userId) return;
+
+      setTyping(conversationId, userId, isTyping);
     };
 
     // ---------------------------
@@ -59,6 +99,7 @@ export default function ChatSocketListener() {
     // Register listeners
     socket.on(CHAT_EVENTS.NEW_MESSAGE, handleNewMessage);
     socket.on(CHAT_EVENTS.MESSAGE_STATUS, handleMessageStatus);
+    socket.on(CHAT_EVENTS.USER_TYPING, handleUserTyping);
     socket.on('connect', handleConnect);
 
     // If already connected, sync immediately
@@ -71,8 +112,9 @@ export default function ChatSocketListener() {
       socket.off(CHAT_EVENTS.NEW_MESSAGE, handleNewMessage);
       socket.off(CHAT_EVENTS.MESSAGE_STATUS, handleMessageStatus);
       socket.off('connect', handleConnect);
+      socket.off(CHAT_EVENTS.USER_TYPING, handleUserTyping);
     };
-  }, [addMessage, updateMessageStatus]);
+  }, [addMessage, updateMessageStatus, setTyping]);
 
   return null;
 }
