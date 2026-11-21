@@ -22,6 +22,14 @@ interface ChatState {
     messageId: string,
     updates: Partial<IMessage>,
   ) => void;
+
+  updateMessageStatus: (
+    conversationId: string,
+    messageIds: string[],
+    status: 'DELIVERED' | 'READ',
+    userId: string,
+    timestamp: string,
+  ) => void;
 }
 
 export const useChatStore = create<ChatState>((set) => ({
@@ -127,4 +135,67 @@ export const useChatStore = create<ChatState>((set) => ({
       },
     }));
   },
+
+  updateMessageStatus: (
+    conversationId,
+    messageIds,
+    status,
+    userId,
+    timestamp,
+  ) =>
+    set((state) => {
+      const currentMessages = state.messages[conversationId];
+
+      if (!currentMessages?.length) return state;
+
+      const messageIdSet = new Set(messageIds);
+
+      return {
+        messages: {
+          ...state.messages,
+          [conversationId]: currentMessages.map((message) => {
+            if (!messageIdSet.has(message.id)) return message;
+
+            const existingReceipts = message.receipts ?? [];
+
+            const receiptExists = existingReceipts.some(
+              (receipt) => receipt.userId === userId,
+            );
+
+            // Update existing receipt
+            const updatedReceipts = existingReceipts.map((receipt) => {
+              if (receipt.userId !== userId) return receipt;
+
+              return {
+                ...receipt,
+                deliveredAt:
+                  receipt.deliveredAt ??
+                  (status === 'DELIVERED' || status === 'READ'
+                    ? timestamp
+                    : null),
+                readAt:
+                  receipt.readAt ?? (status === 'READ' ? timestamp : null),
+              };
+            });
+
+            // Create receipt if it doesn't exist
+            if (!receiptExists) {
+              updatedReceipts.push({
+                userId,
+                deliveredAt:
+                  status === 'DELIVERED' || status === 'READ'
+                    ? timestamp
+                    : null,
+                readAt: status === 'READ' ? timestamp : null,
+              } as IMessage['receipts'][number]);
+            }
+
+            return {
+              ...message,
+              receipts: updatedReceipts,
+            };
+          }),
+        },
+      };
+    }),
 }));

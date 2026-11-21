@@ -14,4 +14,6 @@ export const CHAT_EVENTS = {
 
   USER_ONLINE: 'user:online',
   USER_OFFLINE: 'user:offline',
+
+  SYNC_PENDING_MESSAGES: 'sync_pending_messages',
 } as const;

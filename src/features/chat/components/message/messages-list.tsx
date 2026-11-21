@@ -21,28 +21,26 @@ interface MessagesListProps {
   currentUserId: string;
 }
 
+const EMPTY_MESSAGES: IMessage[] = [];
+
 export const MessagesList = ({
   conversationId,
   currentUserId,
 }: MessagesListProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const EMPTY_MESSAGES: IMessage[] = [];
 
   const isNearBottomRef = useRef(true);
   const previousScrollHeightRef = useRef(0);
   const shouldRestoreScrollRef = useRef(false);
 
-  console.log('ccccc', currentUserId);
-
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useMessages(conversationId);
+
+  const { setMessages, addMessage, updateMessageStatus } = useChatStore();
 
   const messages = useChatStore(
     (state) => state.messages[conversationId] ?? EMPTY_MESSAGES,
   );
-
-  const setMessages = useChatStore((state) => state.setMessages);
-  const addMessage = useChatStore((state) => state.addMessage);
 
   // Flatten pages and arrange messages chronologically.
   const apiMessages = useMemo(() => {
@@ -78,6 +76,8 @@ export const MessagesList = ({
         payload?.message ??
         payload;
 
+      console.log('Newwww message', message);
+
       if (!message?.id || message.conversationId !== conversationId) {
         return;
       }
@@ -91,6 +91,34 @@ export const MessagesList = ({
       socket.off(CHAT_EVENTS.NEW_MESSAGE, handleNewMessage);
     };
   }, [conversationId, addMessage]);
+
+  useEffect(() => {
+    const socket = getSocket();
+
+    if (!socket) return;
+
+    const handleMessageStatus = (payload: any) => {
+      console.log('MESSAGE STATUS RECEIVED:', payload);
+
+      if (payload.conversationId !== conversationId) return;
+
+      if (!payload.messageIds?.length) return;
+
+      updateMessageStatus(
+        payload.conversationId,
+        payload.messageIds,
+        payload.status,
+        payload.deliveredBy ?? payload.readBy,
+        payload.deliveredAt ?? payload.readAt ?? new Date().toISOString(),
+      );
+    };
+
+    socket.on(CHAT_EVENTS.MESSAGE_STATUS, handleMessageStatus);
+
+    return () => {
+      socket.off(CHAT_EVENTS.MESSAGE_STATUS, handleMessageStatus);
+    };
+  }, [conversationId, updateMessageStatus]);
 
   // Track whether the user is near the bottom.
   const handleScroll = useCallback(() => {

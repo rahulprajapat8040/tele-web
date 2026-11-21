@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import type { IMessage } from './interfaces/conversations/messages-res.interface';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -74,4 +75,20 @@ export const formatMessageDate = (date: string) => {
     month: 'long',
     year: 'numeric',
   }).format(messageDate);
+};
+
+export const getMessageStatus = (message: IMessage) => {
+  const receipts = message.receipts ?? [];
+
+  if (!receipts.length) return 'SENT';
+
+  if (receipts.every((receipt) => receipt.readAt)) {
+    return 'READ';
+  }
+
+  if (receipts.every((receipt) => receipt.deliveredAt)) {
+    return 'DELIVERED';
+  }
+
+  return 'SENT';
 };
