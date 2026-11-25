@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils/utils';
 import { useState } from 'react';
 import { motion } from 'motion/react';
 export const ChatTabs = () => {

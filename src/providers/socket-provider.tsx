@@ -10,11 +10,17 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const instance = connectSocket();
-
     setSocket(instance);
 
-    return () => {
+    const onPageHide = () => {
       disconnectSocket();
+    };
+
+    window.addEventListener('pagehide', onPageHide);
+
+    return () => {
+      window.removeEventListener('pagehide', onPageHide);
+      setSocket(null);
     };
   }, []);
 

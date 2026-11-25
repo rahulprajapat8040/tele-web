@@ -23,6 +23,14 @@ interface ChatState {
     updates: Partial<IMessage>,
   ) => void;
 
+  applyMessageEdit: (
+    conversationId: string,
+    messageId: string,
+    updates: Partial<Pick<IMessage, 'content' | 'editedAt' | 'updatedAt'>>,
+  ) => void;
+
+  removeMessage: (conversationId: string, messageId: string) => void;
+
   updateMessageStatus: (
     conversationId: string,
     messageIds: string[],
@@ -139,6 +147,31 @@ export const useChatStore = create<ChatState>((set) => ({
             message.id === messageId || message.clientMessageId === messageId
               ? { ...message, ...updates }
               : message,
+        ),
+      },
+    }));
+  },
+
+  applyMessageEdit: (conversationId, messageId, updates) => {
+    set((state) => ({
+      messages: {
+        ...state.messages,
+        [conversationId]: (state.messages[conversationId] ?? []).map(
+          (message) =>
+            message.id === messageId
+              ? { ...message, ...updates }
+              : message,
+        ),
+      },
+    }));
+  },
+
+  removeMessage: (conversationId, messageId) => {
+    set((state) => ({
+      messages: {
+        ...state.messages,
+        [conversationId]: (state.messages[conversationId] ?? []).filter(
+          (message) => message.id !== messageId,
         ),
       },
     }));

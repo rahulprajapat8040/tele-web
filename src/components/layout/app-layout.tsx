@@ -14,7 +14,6 @@ export const AppLayout = () => {
       }}
       className="flex h-dvh overflow-hidden p-3"
     >
-      {/* <ChatDeliveryListener /> */}
       <ChatSocketListener />
       <div className="flex h-full w-full overflow-hidden shadow-soft justify-between">
         <AppSidebar />

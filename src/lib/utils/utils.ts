@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import type { IMessage } from './interfaces/conversations/messages-res.interface';
+import type { IMessage } from '../interfaces/conversations/messages-res.interface';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -91,4 +91,27 @@ export const getMessageStatus = (message: IMessage) => {
   }
 
   return 'SENT';
+};
+
+export const formatLastSeen = (lastSeenAt: Date | null) => {
+  if (!lastSeenAt) return 'Offline';
+
+  const date = new Date(lastSeenAt);
+  const now = new Date();
+
+  const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (diff < 60) return 'Last seen just now';
+
+  if (diff < 3600) {
+    const minutes = Math.floor(diff / 60);
+    return `Last seen ${minutes} minutes ago`;
+  }
+
+  if (diff < 86400) {
+    const hours = Math.floor(diff / 3600);
+    return `Last seen ${hours} hours ago`;
+  }
+
+  return `Last seen ${date.toLocaleDateString()}`;
 };

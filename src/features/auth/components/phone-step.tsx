@@ -4,7 +4,7 @@ import { Controller, useWatch } from 'react-hook-form';
 
 import type { UseFormReturn } from 'react-hook-form';
 import { PhoneNumberInput } from './phone-input';
-import { getNationalPhoneNumber } from '@/lib/utils';
+import { getNationalPhoneNumber } from '@/lib/utils/utils';
 
 interface PhoneNumberStepProps {
   form: UseFormReturn<LoginFormValues>;

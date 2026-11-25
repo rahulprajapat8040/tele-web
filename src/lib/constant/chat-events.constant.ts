@@ -1,6 +1,10 @@
 export const CHAT_EVENTS = {
   SEND_MESSAGE: 'message:send',
+  EDIT_MESSAGE: 'message:edit',
+  DELETE_MESSAGE: 'message:delete',
   NEW_MESSAGE: 'message:new',
+  MESSAGE_EDITED: 'message:edited',
+  MESSAGE_DELETED: 'message:deleted',
 
   JOIN_CONVERSATION: 'conversation:join',
 

@@ -24,6 +24,8 @@ export interface User {
   lastName: string;
   countryCode: string;
   phoneNo: string;
+  lastSeenAt: Date | null;
+  isOnline: boolean;
 }
 
 export interface Message {

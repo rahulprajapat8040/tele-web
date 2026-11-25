@@ -1,24 +1,40 @@
-import { EllipsisVertical, MessageCircle, Search } from 'lucide-react';
+'use no memo';
+
+import { ConversationAvatar } from '@/components/common/chat/conversation-item';
+import { formatLastSeen } from '@/lib/utils/utils';
+import { EllipsisVertical, Search } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 
 interface ChatHeaderProps {
-  typing?: boolean;
+  displayName: string;
+  isOnline: boolean;
+  isTyping?: boolean;
+  lastSeenAt: string | null;
+  isLoading?: boolean;
 }
 
-export const ChatHeader = ({ typing = false }: ChatHeaderProps) => {
+export const ChatHeader = ({
+  displayName,
+  isOnline,
+  isTyping = false,
+  lastSeenAt,
+  isLoading = false,
+}: ChatHeaderProps) => {
+  const statusLabel = isOnline
+    ? 'online'
+    : formatLastSeen(lastSeenAt ? new Date(lastSeenAt) : null);
+
   return (
     <div className="flex h-12 w-full items-center gap-3.5 rounded-full bg-foreground/90 px-2 text-background drop-shadow">
-      {/* Avatar */}
-      <div className="grid size-10 shrink-0 place-items-center rounded-full bg-primary-100 text-primary-600">
-        <MessageCircle size={22} />
-      </div>
+      <ConversationAvatar isOnline={isOnline} size="sm" />
 
-      {/* Name + typing indicator */}
       <div className="min-w-0 flex-1">
-        <h2 className="truncate font-semibold">The College Mitraa</h2>
+        <h2 className="truncate font-semibold">
+          {isLoading ? 'Loading…' : displayName}
+        </h2>
 
         <AnimatePresence mode="wait">
-          {typing ? (
+          {isTyping ? (
             <motion.div
               key="typing"
               initial={{ opacity: 0, y: 5 }}
@@ -48,26 +64,25 @@ export const ChatHeader = ({ typing = false }: ChatHeaderProps) => {
               </div>
             </motion.div>
           ) : (
-            <motion.h3
+            <motion.p
               key="status"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="text-sm/3.5 text-muted"
             >
-              last seen 6 hours ago
-            </motion.h3>
+              {statusLabel}
+            </motion.p>
           )}
         </AnimatePresence>
       </div>
 
-      {/* Actions */}
       <div className="flex items-center gap-4 pe-3">
-        <button type="button">
+        <button type="button" aria-label="Search in conversation">
           <Search size={22} />
         </button>
 
-        <button type="button">
+        <button type="button" aria-label="Conversation options">
           <EllipsisVertical size={22} />
         </button>
       </div>

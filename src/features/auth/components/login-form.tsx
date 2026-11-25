@@ -3,7 +3,7 @@ import type { LoginPayload } from '@/lib/interfaces/auth/login-form.interface';
 import { useWatch } from 'react-hook-form';
 import { PhoneNumberStep } from './phone-step';
 import { OtpVerificationStep } from './otp-verfication';
-import { getNationalPhoneNumber } from '@/lib/utils';
+import { getNationalPhoneNumber } from '@/lib/utils/utils';
 
 interface LoginFormProps {
   deviceToken?: string;

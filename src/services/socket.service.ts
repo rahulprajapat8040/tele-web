@@ -3,17 +3,17 @@ import { io, Socket } from 'socket.io-client';
 let socket: Socket | null = null;
 
 export const connectSocket = (): Socket => {
-  if (socket?.connected) {
-    return socket;
-  }
-
   if (socket) {
-    socket.disconnect();
+    if (!socket.connected) {
+      socket.connect();
+    }
+
+    return socket;
   }
 
   socket = io(import.meta.env.VITE_API_URL, {
     withCredentials: true,
-    transports: ['websocket'],
+    transports: ['websocket', 'polling'],
     reconnection: true,
     reconnectionAttempts: Infinity,
     reconnectionDelay: 1000,
@@ -21,7 +21,7 @@ export const connectSocket = (): Socket => {
   });
 
   socket.on('connect', () => {
-    console.log('Socket connected:', socket.id);
+    console.log('Socket connected:', socket?.id);
   });
 
   socket.on('disconnect', (reason) => {
@@ -35,7 +35,9 @@ export const connectSocket = (): Socket => {
   return socket;
 };
 
-export const getSocket = () => socket;
+export const getSocket = (): Socket => {
+  return socket ?? connectSocket();
+};
 
 export const disconnectSocket = () => {
   socket?.disconnect();

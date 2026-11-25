@@ -11,10 +11,13 @@ import { useMessages } from '@/hooks/use-messages';
 import { LoaderCircle, MessageCircle } from 'lucide-react';
 import { useChatStore } from '@/lib/store/chat.store';
 import type { IMessage } from '@/lib/interfaces/conversations/messages-res.interface';
-import { formatMessageDate } from '@/lib/utils';
+import { formatMessageDate } from '@/lib/utils/utils';
 import { MessageItem } from './messages-item';
+import { MessageOptions } from './message-options';
 import { CHAT_EVENTS } from '@/lib/constant/chat-events.constant';
 import { getSocket } from '@/services/socket.service';
+import { useMessageOption } from '@/lib/store/message-option.store';
+import { canEditMessage } from '@/lib/utils/message.utils';
 
 interface MessagesListProps {
   conversationId: string;
@@ -198,6 +201,16 @@ export const MessagesList = ({
     return groups;
   }, [messages]);
 
+  const {
+    selectedMessage,
+    menuPosition,
+    openMenu,
+    closeMenu,
+    setReplyTo,
+    setEditingMessage,
+    openDeleteDialog,
+  } = useMessageOption();
+
   if (isLoading && !messages.length) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -205,6 +218,9 @@ export const MessagesList = ({
       </div>
     );
   }
+
+  const showMenu =
+    selectedMessage?.conversationId === conversationId && menuPosition;
 
   return (
     <div
@@ -252,12 +268,34 @@ export const MessagesList = ({
                   key={message.id || message.clientMessageId}
                   message={message}
                   isOwn={message.senderId === currentUserId}
+                  onMenuChange={(message, position) =>
+                    openMenu(conversationId, message, position)
+                  }
                 />
               ))}
             </div>
           </div>
         ))}
       </div>
+
+      {showMenu && selectedMessage && menuPosition && (
+        <MessageOptions
+          open
+          position={menuPosition}
+          message={selectedMessage}
+          onClose={closeMenu}
+          onReply={() => setReplyTo(conversationId, selectedMessage)}
+          showEdit={canEditMessage(selectedMessage, currentUserId)}
+          onEdit={() => setEditingMessage(conversationId, selectedMessage)}
+          onCopy={() =>
+            console.log('Copy message:', selectedMessage.id, selectedMessage.content)
+          }
+          onPin={() => console.log('Pin message:', selectedMessage.id)}
+          onForward={() => console.log('Forward message:', selectedMessage.id)}
+          onSelect={() => console.log('Select message:', selectedMessage.id)}
+          onDelete={() => openDeleteDialog(conversationId, selectedMessage)}
+        />
+      )}
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import { GetFilterUrl } from '@/lib/utils';
+import { GetFilterUrl } from '@/lib/utils/utils';
 import { request } from '../axios/request';
 import type { IApiResponse } from '@/lib/interfaces/common/base-res.interface';
 import type { IMessagesRes } from '@/lib/interfaces/conversations/messages-res.interface';

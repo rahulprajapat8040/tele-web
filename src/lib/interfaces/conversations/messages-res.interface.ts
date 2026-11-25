@@ -3,6 +3,13 @@ export interface IMessagesRes {
   pagination: Pagination;
 }
 
+export interface IMessageReplyPreview {
+  id: string;
+  content: string | null;
+  senderId: string;
+  sender: Sender;
+}
+
 export interface IMessage {
   id: string;
   clientMessageId: string;
@@ -10,8 +17,12 @@ export interface IMessage {
   content: string;
   conversationId: string;
   senderId: string;
+  replyToMessageId?: string | null;
+  replyTo?: IMessageReplyPreview | null;
   createdAt: string;
   updatedAt: string;
+  editedAt?: string | null;
+  deletedForAllAt?: string | null;
   deletedAt: any;
   sender: Sender;
   receipts: Receipt[];

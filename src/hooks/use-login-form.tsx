@@ -3,7 +3,7 @@ import type {
   LoginPayload,
   LoginStep,
 } from '@/lib/interfaces/auth/login-form.interface';
-import { generateDeviceId, getNationalPhoneNumber } from '@/lib/utils';
+import { generateDeviceId, getNationalPhoneNumber } from '@/lib/utils/utils';
 import { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useApiMutation } from './use-api-mutation';
